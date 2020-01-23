@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% block title %}<title>HomeTax</title>
+{% endblock title %}
+
+{% block nav_left %}
+{% endblock nav_left %}
+
+{% block content %}
+<p><h5><mark> 홈택스 로그인 정보 저장</mark></h5></p><hr>
+
+<div class="form-row">
+    <div class="form-group input-group-sm">
+        <button id="show" class="form-control btn btn-primary btn-sm" onclick="location.href='{% url 'nts:getcert' %}'">인증서등록</button>
+    </div>
+    <div class="form-group input-group-sm">
+        <label for="ctacert"><b>&nbsp&nbsp인증서&nbsp</b></label>
+    </div>
+    <div class="form-group input-group-sm">
+        <select name="" id="ctacert">
+            {% if ctacert_obj %}
+                {% for ctacert in ctacert_obj %}
+                    <option value="{{ctacert.id}}" {% if ctacert.num_used.max %} selected="selected" {% endif %}>{{ctacert.cert_nm}}</option>
+                {% endfor %}
+            {% else %}
+                <option>등록요망</option>   
+            {% endif %}
+        </select>
+    </div>
+    <div class="form-group col-md-1 input-group-sm">
+        <button type="submit" class="btn btn-danger btn-sm" onclick="delete_cert()">삭제</button>
+    </div>
+    <div class="form-group col-md-1 input-group-sm">
+        <select name="ctaId" id="" >
+            <option value=""></option>
+        </select>
+    </div>
+    <div class="form-group col-md-1 input-group-sm">
+        <select name="bsId" id="">
+            <option value=""></option>
+        </select>
+    </div>
+    <div class="form-group col-md-1 input-group-sm">
+        <button type="submit" class="btn btn-success btn-sm" onclick="">조회</button>
+    </div>
+</div>
+{% if messages %}
+<div class="alert alert-primary alert-dismissible fade show" role="alert" >
+    <strong> 
+        {% for message in messages %}
+        {{ message.tags }}
+        {{ message.message }}
+        {% endfor %}
+    </strong>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button> 
+</div>
+{% endif %}
+
+<div class="form-row">
+    <div class="form-row col-auto">
+        <div class="form-group input-group-sm">
+            <label for="agentId"><b>세무대리인&nbsp&nbsp</b></label>
+        </div>
+        <div class="form-group input-group-sm">
+            <input type="text" class="form-control" id="agentId" placeholder="CTA ID" >
+        </div>
+        <div class="form-group input-group-sm">
+            <input type="password" class="form-control" id="agentPw" placeholder="PassWord">
+        </div>
+        <div class="form-group input-group-sm">
+            <label for="ctaPwShow">
+                <input type="checkbox" class="form-check-input" id="ctaPwShow">
+            </label>
+        </div>
+    </div>
+    <div class="form-row col-auto">
+        <div class="form-group input-group-sm">
+            <label for="userId"><b>&nbsp&nbsp부서사용자&nbsp&nbsp</b></label>
+        </div>
+        <div class="form-group input-group-sm">
+            <input type="text" class="form-control" id="userId" placeholder="사용자 ID">
+        </div>
+        <div class="form-group input-group-sm">
+            <input type="password" class="form-control" id="userPw" placeholder="PassWord">
+        </div>
+        <div class="form-group input-group-sm">
+            <label for="userPwShow">
+                <input type="checkbox" class="form-check-input" id="userPwShow">
+            </label>
+        </div>
+    </div>
+    <div class="form-group col-md-1 input-group-sm">
+        <button id="btn_cta_bs_idpw" class="form-control btn btn-primary btn-sm">저장</button>
+    </div>  
+</div>
+<hr>
+{% endblock content %}
+
+{% block javascript %}
+<script>
+
+function get_selected_cert(){
+    var cert_id = $("#ctacert option:selected").val();
+    if(cert_id !="등록요망"){
+        return cert_id
+    } else {
+        return false
+    };    
+};
+
+function delete_cert(){
+    var cert_id = get_selected_cert();
+    if(cert_id != false){
+        $.ajax({                    // Ajax 메소드 http://bitly.kr/RICE9SXo
+            url: "{% url 'nts:cert-delete' %}",
+            type: "POST",
+            data:{'id':cert_id, 'csrfmiddlewaretoken': '{{ csrf_token }}'},
+            datatype:"json",
+            success: function(response){
+            alert( response.object  + "가 삭제되었습니다.");
+            },
+        })
+        .always(function(){
+            window.location.reload();       // 새로고침
+        });
+    }; 
+};
+
+$( "#show" ).click(function() {
+    $( "div.alert" ).show("slow");
+});
+
+//<!-- 인포텍 인증서 모듈 메세지 -->
+$(function(){
+    {% if messages %}
+        {% for message in messages %}
+            var msg = "{{ message.message }}";            
+        {% endfor %}
+        <!-- alert(msg);         -->
+    {% endif %}
+});
+
+$('#btn_cta_bs_idpw').click(function(){
+    var certId = get_selected_cert();
+    var agentId = $('#agentId').val();
+    var agentPw = $('#agentPw').val();
+    var userId = $('#userId').val();
+    var userPw = $('#userPw').val();
+    //alert(cert_nm + agentId + "_" + userId + "_")
+    $.ajax({
+        url:"{% url 'nts:get_idpw' %}",
+        type: 'POST',
+        data: {
+            'certId': certId,
+            'agentId':agentId,
+            'agentPw':agentPw,
+            'userId':userId,
+            'userPw':userPw,
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+        },
+        datatype:'json',
+        success:function(res){
+            alert(res.res_cta_idpw.ctaid);
+        },
+        error:function(request, status, error){
+            alert("실패");
+            alert(request);
+            alert(status);
+            alert(error);
+        },
+    });
+});
+
+</script>
+{% endblock javascript %}
