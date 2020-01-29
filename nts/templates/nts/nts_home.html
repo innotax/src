@@ -16,7 +16,7 @@
         <label for="ctacert"><b>&nbsp&nbsp인증서&nbsp</b></label>
     </div>
     <div class="form-group input-group-sm">
-        <select name="" id="ctacert">
+        <select name="" id="id_ctacert">
             {% if ctacert_obj %}
                 {% for ctacert in ctacert_obj %}
                     <option value="{{ctacert.id}}" {% if ctacert.num_used.max %} selected="selected" {% endif %}>{{ctacert.cert_nm}}</option>
@@ -30,17 +30,25 @@
         <button type="submit" class="btn btn-danger btn-sm" onclick="delete_cert()">삭제</button>
     </div>
     <div class="form-group col-md-1 input-group-sm">
-        <select name="ctaId" id="" >
-            <option value=""></option>
-        </select>
+        {% if ctaidpw_obj %}
+            <select name="ctaId" id="id_ctaidpw" >
+            {% comment %} {% for cta in ctaidpw_obj %}
+                <option value="{{ cta.ctaid }}">{{ cta.ctaid }}</option>
+            {% endfor %} {% endcomment %}
+            </select>
+        {% endif %}
     </div>
     <div class="form-group col-md-1 input-group-sm">
-        <select name="bsId" id="">
-            <option value=""></option>
-        </select>
+        {% if bsidpw_obj %}
+            <select name="bsId" id="id_bsidpw">
+                {% comment %} {% for bs in bsidpw_obj %}
+                    <option value="{{ bs.bsid }}">{{ bs.bsid }}</option>
+                {% endfor %} {% endcomment %}
+            </select>
+        {% endif %}
     </div>
     <div class="form-group col-md-1 input-group-sm">
-        <button type="submit" class="btn btn-success btn-sm" onclick="">조회</button>
+        <button type="submit" class="btn btn-success btn-sm" id="btn_ask" onclick="">조회</button>
     </div>
 </div>
 {% if messages %}
@@ -63,7 +71,7 @@
             <label for="agentId"><b>세무대리인&nbsp&nbsp</b></label>
         </div>
         <div class="form-group input-group-sm">
-            <input type="text" class="form-control" id="agentId" placeholder="CTA ID" >
+            <input type="text" class="form-control" id="agentId" placeholder="CTA ID" value="">
         </div>
         <div class="form-group input-group-sm">
             <input type="password" class="form-control" id="agentPw" placeholder="PassWord">
@@ -101,7 +109,7 @@
 <script>
 
 function get_selected_cert(){
-    var cert_id = $("#ctacert option:selected").val();
+    var cert_id = $("#id_ctacert option:selected").val();
     if(cert_id !="등록요망"){
         return cert_id
     } else {
@@ -132,6 +140,7 @@ $( "#show" ).click(function() {
 });
 
 //<!-- 인포텍 인증서 모듈 메세지 -->
+
 $(function(){
     {% if messages %}
         {% for message in messages %}
@@ -139,7 +148,98 @@ $(function(){
         {% endfor %}
         <!-- alert(msg);         -->
     {% endif %}
+    var id_cert = $("#id_ctacert option:selected").val();
+    $.ajax({
+        url: "{% url 'nts:set_ctaid' %}",
+        type: "GET",
+        data: {
+            'id_cert': id_cert
+        },
+        success: function(data){
+            $("#id_ctaidpw").html(data);
+        }
+    })
+    .done(function(){
+        var id_ctaid = $("#id_ctaidpw option:selected").val();
+        $.ajax({
+            url: "{% url 'nts:set_bsid' %}",
+            type: "GET",
+            data: {
+                'id_cert': id_cert,
+                'id_ctaid': id_ctaid
+            },
+            success: function(data){
+                $("#id_bsidpw").html(data);
+            }
+        });
+    });   
 });
+
+$("#id_ctacert").on("click change", function(){
+    var id_cert = $("#id_ctacert option:selected").val();
+    $.ajax({
+        url: "{% url 'nts:set_ctaid' %}",
+        type: "GET",
+        data: {
+            'id_cert': id_cert
+        },
+        success: function(data){
+            $("#id_ctaidpw").html(data);
+        }
+    })
+    .done(function(){
+        var id_ctaid = $("#id_ctaidpw option:selected").val();
+        $.ajax({
+            url: "{% url 'nts:set_bsid' %}",
+            type: "GET",
+            data: {
+                'id_cert': id_cert,
+                'id_ctaid': id_ctaid
+            },
+            success: function(data){
+                $("#id_bsidpw").html(data);
+                $("#agentId").val(id_ctaid);
+                var ctapw = get_ctapw();
+                $("#agentPw").val(ctapw);
+            }
+        });
+    });   
+}); 
+
+function get_ctapw(){
+    var id_ctaid = $("#id_ctaidpw option:selected").val();
+    $.ajax({
+        url: "{% url 'nts:get_ctaidpw' %}",
+        type: "GET",
+        data: {
+            'id_ctaid': id_ctaid
+        },
+        datatype: "json",
+        success: function(data){
+            alert(data)
+            var ctapw = data.ctaidpw.pw;
+            alert(ctapw)
+            return ctapw
+        }
+    });
+};
+
+// jquery multi event
+$("#id_ctaidpw").on("click change", function(){
+    var id_cert = $("#id_ctacert option:selected").val();
+    var id_ctaid = $("#id_ctaidpw option:selected").val();
+    $.ajax({
+        url: "{% url 'nts:set_bsid' %}",
+        type: "GET",
+        data: {
+            'id_cert': id_cert,
+            'id_ctaid': id_ctaid
+        },
+        success: function(data){
+            $("#id_bsidpw").html(data);
+        }
+    });
+}); 
 
 $('#btn_cta_bs_idpw').click(function(){
     var certId = get_selected_cert();
@@ -169,7 +269,17 @@ $('#btn_cta_bs_idpw').click(function(){
             alert(status);
             alert(error);
         },
+    })
+    .always(function(){
+        window.location.reload();       // 새로고침
     });
+});
+
+$("#btn_ask").click(function(){
+    var cert_v = $("#id_ctacert option:selected").val();
+    var cert_t = $("#id_ctacert option:selected").text();
+    alert("cert_v: " + cert_v);
+    alert("cert_t: " + cert_t);
 });
 
 </script>

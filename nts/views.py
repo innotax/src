@@ -20,6 +20,29 @@ def nts_home(request):
         }
     return render(request, template_name, context)
 
+def set_ctaid(request):
+    id_cert = request.GET.get('id_cert')
+    ctaidpws = CtaIdPw.objects.filter(ctacert_id=id_cert).order_by('ctaid')
+    return render(request, 'nts/ctaid_list_options.html', {'ctaidpws': ctaidpws})
+
+def get_ctaidpw(request):
+    id_ctaid = request.GET.get('id_ctaid')
+    ctaidpw = CtaIdPw.objects.filter(ctaid__exact=id_ctaid)
+    print("*"*50, ctaidpw)
+    ctaidpw = ctaidpw.values()
+    response = {'ctaidpw': ctaidpw}
+    print("ctaidpw :", ctaidpw)
+    print("response :", response)
+    print(type(ctaidpw), type(response))
+    return JsonResponse(response, safe=False)
+
+def set_bsid(request):
+    id_cert = request.GET.get('id_cert')
+    id_ctaid = request.GET.get('id_ctaid')
+    bsidpws = BsIdPw.objects.filter(ctacert_id=id_cert).filter(
+        ctaidpw_id=id_ctaid).order_by('bsid')
+    return render(request, 'nts/bsid_list_options.html', {'bsidpws': bsidpws})
+
 
 def getcert(request):
     cert_info = get_cert_info()

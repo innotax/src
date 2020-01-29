@@ -1,0 +1,4 @@
+{% comment %} <option value="">---------</option> {% endcomment %}
+{% for ctaid in ctaidpws %}
+<option value="{{ ctaid.pk }}" >{{ ctaid.ctaid }}</option>
+{% endfor %}

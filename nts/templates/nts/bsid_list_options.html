@@ -1,0 +1,4 @@
+{% comment %} <option value="">---------</option> {% endcomment %}
+{% for bsid in bsidpws %}
+<option value="{{ bsid.pk }}" >{{ bsid.bsid }}</option>
+{% endfor %}
