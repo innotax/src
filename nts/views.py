@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.db import IntegrityError 
 from django.contrib import messages  # 경고창 https://hoy.kr/kxuTa
 from django.http import JsonResponse
+from django.core import serializers
 from django.views.generic import View
 
 from .models import CtaCert, CtaIdPw, BsIdPw
@@ -25,17 +26,6 @@ def set_ctaid(request):
     ctaidpws = CtaIdPw.objects.filter(ctacert_id=id_cert).order_by('ctaid')
     return render(request, 'nts/ctaid_list_options.html', {'ctaidpws': ctaidpws})
 
-def get_ctaidpw(request):
-    id_ctaid = request.GET.get('id_ctaid')
-    ctaidpw = CtaIdPw.objects.filter(ctaid__exact=id_ctaid)
-    print("*"*50, ctaidpw)
-    ctaidpw = ctaidpw.values()
-    response = {'ctaidpw': ctaidpw}
-    print("ctaidpw :", ctaidpw)
-    print("response :", response)
-    print(type(ctaidpw), type(response))
-    return JsonResponse(response, safe=False)
-
 def set_bsid(request):
     id_cert = request.GET.get('id_cert')
     id_ctaid = request.GET.get('id_ctaid')
@@ -43,6 +33,19 @@ def set_bsid(request):
         ctaidpw_id=id_ctaid).order_by('bsid')
     return render(request, 'nts/bsid_list_options.html', {'bsidpws': bsidpws})
 
+def get_ctaidpw(request):
+    id_ctaid = request.GET.get('id_ctaid')
+    ctaidpw = CtaIdPw.objects.filter(ctaid__exact=id_ctaid)   
+    # https://stackoverflow.com/questions/26373992/use-jsonresponse-to-serialize-a-queryset-in-django-1-7
+    response = serializers.serialize('json', ctaidpw)
+    return JsonResponse(response, safe=False)
+
+def get_bsidpw(request):
+    userId = request.GET.get('userId')
+    bsidpw = BsIdPw.objects.filter(bsid__exact=userId)
+    # https://stackoverflow.com/questions/26373992/use-jsonresponse-to-serialize-a-queryset-in-django-1-7
+    response = serializers.serialize('json', bsidpw)
+    return JsonResponse(response, safe=False)
 
 def getcert(request):
     cert_info = get_cert_info()
@@ -122,3 +125,16 @@ def get_idpw(request):
         }
 
     return JsonResponse(response)
+
+
+def nts_z1001(request):
+    if request.method == 'POST':
+        certId = request.POST['certId']
+        agentId = request.POST['agentId']
+        userId = request.POST['userId']
+
+        cert_info_obj = CtaCert.objects.get(pk=certId)
+        signCert = cert_info_obj.file1
+        signPri = cert_info_obj.file2
+        signPw = cert_info_obj.cert_pw
+        

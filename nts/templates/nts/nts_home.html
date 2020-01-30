@@ -77,8 +77,8 @@
             <input type="password" class="form-control" id="agentPw" placeholder="PassWord">
         </div>
         <div class="form-group input-group-sm">
-            <label for="ctaPwShow">
-                <input type="checkbox" class="form-check-input" id="ctaPwShow">
+            <label for="ctaPwTogle">
+                <input type="checkbox" class="form-check-input" id="ctaPwTogle">
             </label>
         </div>
     </div>
@@ -93,8 +93,8 @@
             <input type="password" class="form-control" id="userPw" placeholder="PassWord">
         </div>
         <div class="form-group input-group-sm">
-            <label for="userPwShow">
-                <input type="checkbox" class="form-check-input" id="userPwShow">
+            <label for="userPwTogle">
+                <input type="checkbox" class="form-check-input" id="userPwTogle">
             </label>
         </div>
     </div>
@@ -199,8 +199,10 @@ $("#id_ctacert").on("click change", function(){
             success: function(data){
                 $("#id_bsidpw").html(data);
                 $("#agentId").val(id_ctaid);
-                var ctapw = get_ctapw();
-                $("#agentPw").val(ctapw);
+                get_ctapw();
+                var userId = $("#id_bsidpw option:selected").val();
+                $("#userId").val(userId);
+                get_bspw();
             }
         });
     });   
@@ -216,10 +218,26 @@ function get_ctapw(){
         },
         datatype: "json",
         success: function(data){
-            alert(data)
-            var ctapw = data.ctaidpw.pw;
-            alert(ctapw)
-            return ctapw
+            jp = JSON.parse(data)
+            var ctapw = jp[0].fields.pw;
+            $("#agentPw").val(ctapw);
+        }
+    });
+};
+
+function get_bspw(){
+    var userId = $("#id_bsidpw option:selected").val();
+    $.ajax({
+        url: "{% url 'nts:get_bsidpw' %}",
+        type: "GET",
+        data: {
+            'userId': userId
+        },
+        datatype: "json",
+        success: function(data){
+            jp = JSON.parse(data)
+            var userPw = jp[0].fields.pw;
+            $("#userPw").val(userPw);
         }
     });
 };
@@ -238,6 +256,25 @@ $("#id_ctaidpw").on("click change", function(){
         success: function(data){
             $("#id_bsidpw").html(data);
         }
+    })
+    .done(function(){
+        var id_ctaid = $("#id_ctaidpw option:selected").val();
+        $.ajax({
+            url: "{% url 'nts:set_bsid' %}",
+            type: "GET",
+            data: {
+                'id_cert': id_cert,
+                'id_ctaid': id_ctaid
+            },
+            success: function(data){
+                $("#id_bsidpw").html(data);
+                $("#agentId").val(id_ctaid);
+                get_ctapw();
+                var userId = $("#id_bsidpw option:selected").val();
+                $("#userId").val(userId);
+                get_bspw();
+            }
+        });
     });
 }); 
 
@@ -275,12 +312,47 @@ $('#btn_cta_bs_idpw').click(function(){
     });
 });
 
+// 패스워드 보이기 체크박스 https://www.tutorialrepublic.com/faq/how-to-check-a-checkbox-is-checked-or-not-using-jquery.php
+$("#ctaPwTogle").click(function(){
+    if($(this).is(":checked")){
+        $("#agentPw").prop("type", "text");
+    }
+    else if($(this).is(":not(:checked)")){
+        $("#agentPw").prop("type", "password");
+    }
+});
+$("#userPwTogle").click(function(){
+    if($(this).is(":checked")){
+        $("#userPw").prop("type", "text");
+    }
+    else if($(this).is(":not(:checked)")){
+        $("#userPw").prop("type", "password");
+    }
+});
+
 $("#btn_ask").click(function(){
-    var cert_v = $("#id_ctacert option:selected").val();
-    var cert_t = $("#id_ctacert option:selected").text();
-    alert("cert_v: " + cert_v);
-    alert("cert_t: " + cert_t);
+    var certId = $("#id_ctacert option:selected").val();
+    var agentId = $("#id_ctaidpw option:selected").val();
+    var userId = $("#id_bsidpw option:selected").val();
+    console.log("certId: " + certId);
+    console.log("agentId: " + agentId);
+    console.log("userId: " + userId);
+    $.ajax({
+        url: "{% url 'nts:nts_z1001' %}",
+        type: 'POST',
+        data:{
+           'certId': certId, 
+           'agentId': agentId, 
+           'userId': userId,
+           'csrfmiddlewaretoken': '{{ csrf_token }}' 
+        },
+        datatype: 'json',
+        success: function(res){
+            alert("To do")
+        }
+    })
 });
 
 </script>
 {% endblock javascript %}
+
