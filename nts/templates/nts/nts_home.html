@@ -338,7 +338,7 @@ $("#btn_ask").click(function(){
     console.log("agentId: " + agentId);
     console.log("userId: " + userId);
     $.ajax({
-        url: "{% url 'nts:nts_z1001' %}",
+        url: "{% url 'nts:nts_Z1001' %}",
         type: 'POST',
         data:{
            'certId': certId, 
@@ -347,11 +347,36 @@ $("#btn_ask").click(function(){
            'csrfmiddlewaretoken': '{{ csrf_token }}' 
         },
         datatype: 'json',
+        {% comment %} async: false {% endcomment %}
+    })
+    .done(function(data){
+        console.log(data);
+    });
+});
+{% comment %} 
+$("#btn_ask").click(function(){
+    var certId = $("#id_ctacert option:selected").val();
+    var agentId = $("#id_ctaidpw option:selected").val();
+    var userId = $("#id_bsidpw option:selected").val();
+    console.log("certId: " + certId);
+    console.log("agentId: " + agentId);
+    console.log("userId: " + userId);
+    $.ajax({
+        url: "{% url 'nts:nts_Z1001' %}",
+        type: 'POST',
+        data:{
+           'certId': certId, 
+           'agentId': agentId, 
+           'userId': userId,
+           'csrfmiddlewaretoken': '{{ csrf_token }}' 
+        },
+        datatype: 'json',
+        async: false,
         success: function(res){
-            alert("To do")
+            alert(res);
         }
     })
-});
+}); {% endcomment %}
 
 </script>
 {% endblock javascript %}

@@ -6,8 +6,15 @@ from django.core import serializers
 from django.views.generic import View
 
 from .models import CtaCert, CtaIdPw, BsIdPw
-from scripts.utils import get_cert_info
+from scripts.utils import get_cert_info, ift_call2
 import json
+
+import win32com.client
+import binascii  # excel Hexadecimal to file(binary)
+
+iftCertdll = win32com.client.Dispatch("iftCoreEngine.iftGate")
+iftServicedll = win32com.client.Dispatch("iftWinExAdapter.clsAdapter")
+
 
 def nts_home(request):
     template_name = 'nts/nts_home.html'
@@ -127,8 +134,14 @@ def get_idpw(request):
     return JsonResponse(response)
 
 
-def nts_z1001(request):
+def nts_Z1001(request):
     if request.method == 'POST':
+        req_dict = dict()
+        req_dict['appCd'] = 'aitax'
+        req_dict['orgCd'] = 'hometax'
+        req_dict['svcCd'] = 'Z1001'
+        req_dict['loginMethod'] = 'CERT'
+
         certId = request.POST['certId']
         agentId = request.POST['agentId']
         userId = request.POST['userId']
@@ -137,4 +150,32 @@ def nts_z1001(request):
         signCert = cert_info_obj.file1
         signPri = cert_info_obj.file2
         signPw = cert_info_obj.cert_pw
+
+        ctaidpw_obj = CtaIdPw.objects.get(pk=agentId)
+        agentPw = ctaidpw_obj.pw
+
+        bsidpw_obj = BsIdPw.objects.get(pk=userId)
+        userPw = bsidpw_obj.pw
+
+        req_dict['agentId'] = agentId
+        req_dict['userId'] = userId
+        req_dict['signCert'] = signCert
+        req_dict['signPri'] = signPri
+        req_dict['signPw'] = signPw
+        req_dict['agentPw'] = agentPw
+        req_dict['userPw'] = userPw
+
+        req_str = json.dumps(req_dict, ensure_ascii=False)
+        print(type(req_str))
+        print(req_str)
+        res_dict = ift_call2(req_str)
+        # res_str, req_str = iftServicedll.serviceCall2(req_str)
+        # print(res_str)
+        # res_dic = json.loads(res_str)
+        
+        return JsonResponse(res_dict)
+
+        
+
+
         

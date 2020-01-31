@@ -8,7 +8,7 @@ from .views import (
     set_bsid,
     get_ctaidpw,
     get_bsidpw,
-    nts_z1001
+    nts_Z1001
 )
 
 app_name = 'nts'
@@ -21,5 +21,5 @@ urlpatterns = [
     path('getcert/', getcert, name='getcert'),
     path('del/', del_ctacert, name='cert-delete'),
     path('idpw/', get_idpw, name='get_idpw'),
-    path('nts_z1001/', nts_z1001, name='nts_z1001'),
+    path('nts_Z1001/', nts_Z1001, name='nts_Z1001'),
 ]
