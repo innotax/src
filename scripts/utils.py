@@ -27,8 +27,12 @@ def get_cert_info():
 def ift_call2(req_str):
     print(req_str)
     print(">"*100)
-    res_str, req_str = iftServicedll.serviceCall2(req_str)
-    print("*"*100)
+    try:
+        res_str, req_str = iftServicedll.serviceCall2(req_str)
+        print("*"*100)
+    except Exception as e:
+        print("e"*100)
+        print(e)
     res_dict = json.loads(res_str)
     print(res_dict)
     return res_dict
