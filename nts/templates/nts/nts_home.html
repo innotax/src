@@ -9,6 +9,8 @@
 <p><h5><mark> 홈택스 로그인 정보 저장</mark></h5></p><hr>
 
 <div class="form-row">
+    {% comment %} <form action="{% url 'nts:nts_Z1001' %}" method="post">
+    {% csrf_token %} {% endcomment %}
     <div class="form-group input-group-sm">
         <button id="show" class="form-control btn btn-primary btn-sm" onclick="location.href='{% url 'nts:getcert' %}'">인증서등록</button>
     </div>
@@ -16,7 +18,7 @@
         <label for="ctacert"><b>&nbsp&nbsp인증서&nbsp</b></label>
     </div>
     <div class="form-group input-group-sm">
-        <select name="" id="id_ctacert">
+        <select name="certId" id="id_ctacert">
             {% if ctacert_obj %}
                 {% for ctacert in ctacert_obj %}
                     <option value="{{ctacert.id}}" {% if ctacert.num_used.max %} selected="selected" {% endif %}>{{ctacert.cert_nm}}</option>
@@ -48,8 +50,9 @@
         {% endif %}
     </div>
     <div class="form-group col-md-1 input-group-sm">
-        <button type="submit" class="btn btn-success btn-sm" id="btn_ask" onclick="">조회</button>
+        <button type="submit" class="btn btn-success btn-sm" id="btn_ask" onclick="" >조회</button>
     </div>
+    {% comment %} </form> {% endcomment %}
 </div>
 {% if messages %}
 <div class="alert alert-primary alert-dismissible fade show" role="alert" >
@@ -347,12 +350,13 @@ $("#btn_ask").click(function(){
            'csrfmiddlewaretoken': '{{ csrf_token }}' 
         },
         datatype: 'json',
-        {% comment %} async: false {% endcomment %}
+        async: false
     })
     .done(function(data){
         console.log(data);
     });
 });
+
 {% comment %} 
 $("#btn_ask").click(function(){
     var certId = $("#id_ctacert option:selected").val();

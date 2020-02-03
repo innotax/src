@@ -28,7 +28,9 @@ def ift_call2(req_str):
     print(req_str)
     print(">"*100)
     try:
+        print(">"*50)
         res_str, req_str = iftServicedll.serviceCall2(req_str)
+        
         print("*"*100)
     except Exception as e:
         print("e"*100)
@@ -45,8 +47,8 @@ def get_now():
     return strNow
 
 
-# print(">"*100)
-# res_str, req_str = iftServicedll.serviceCall2(req)
-# print("*"*100)
-# res_dict = json.loads(res_str)
-# print(res_dict)
+print(">"*100)
+res_str, req_str = iftServicedll.serviceCall2(req)
+print("*"*100)
+res_dict = json.loads(res_str)
+print(res_dict)

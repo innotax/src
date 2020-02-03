@@ -137,6 +137,7 @@ def get_idpw(request):
 # https://www.ionos.com/digitalguide/hosting/technical-matters/err-connection-refused/
 def nts_Z1001(request):
     if request.method == 'POST':
+        print(request.POST)
         req_dict = dict()
         req_dict['appCd'] = 'aitax'
         req_dict['orgCd'] = 'hometax'
@@ -144,7 +145,9 @@ def nts_Z1001(request):
         req_dict['loginMethod'] = 'CERT'
 
         certId = request.POST['certId']
+        print(certId)
         agentId = request.POST['agentId']
+        print(agentId)
         userId = request.POST['userId']
 
         cert_info_obj = CtaCert.objects.get(pk=certId)
@@ -174,6 +177,7 @@ def nts_Z1001(request):
         # print(res_str)
         # res_dic = json.loads(res_str)
         
+        # return redirect("/nts/")
         return JsonResponse(res_dict)
 
         
