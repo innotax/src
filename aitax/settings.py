@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'corsheaders',   # https://blog.thereis.xyz/41
+    'corsheaders',   # https://blog.thereis.xyz/41  https://makerj.tistory.com/225
     'nts.apps.NtsConfig',
 ]
 

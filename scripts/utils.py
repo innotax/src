@@ -17,6 +17,7 @@ Data = "Hellow World!!"
 req = '{"appCd": "aitax", "orgCd": "hometax", "svcCd": "Z1001", "loginMethod": "CERT", "agentId": "w15960", "userId": "innotax154", "signCert": "C:\\Users\\김명중\\AppData\\LocalLow\\NPKI\\yessign\\USER\\cn=세무법인이노택스테헤(BizBank)008868520131118188000375,ou=BizBank,ou=SHB,ou=xUse4Esero,o=yessign,c=kr\\SignCert.der", "signPri": "C:\\Users\\김명중\\AppData\\LocalLow\\NPKI\\yessign\\USER\\cn=세무법인이노택스테헤(BizBank)008868520131118188000375,ou=BizBank,ou=SHB,ou=xUse4Esero,o=yessign,c=kr\\SignPri.key", "signPw": "innotax1260!", "agentPw": "1234", "userPw": "dlshxortm14!"}'
 
 def get_cert_info():
+    iftCertdll = win32com.client.Dispatch("iftCoreEngine.iftGate")
     req_str = ""
     res_str = iftCertdll.getUserCert(req_str)  # json str
     cert_info = json.loads(res_str)      # json to dic
@@ -25,6 +26,11 @@ def get_cert_info():
     return cert_info
 
 def ift_call2(req_str):
+    # iftCertdll = win32com.client.Dispatch("iftCoreEngine.iftGate")
+
+
+    # iftServicedll = win32com.client.Dispatch("iftWinExAdapter.clsAdapter")
+
     print(req_str)
     print(">"*100)
     try:
@@ -47,8 +53,9 @@ def get_now():
     return strNow
 
 
-print(">"*100)
-res_str, req_str = iftServicedll.serviceCall2(req)
-print("*"*100)
-res_dict = json.loads(res_str)
-print(res_dict)
+# print(">"*100)
+# # res_str, req_str = iftServicedll.serviceCall2(req)
+# res_dict = ift_call2(req)
+# # print("*"*100)
+# # res_dict = json.loads(res_str)
+# print(res_dict)

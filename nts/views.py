@@ -5,6 +5,11 @@ from django.http import JsonResponse
 from django.core import serializers
 from django.views.generic import View
 
+import os, sys
+# 상위폴더 내 파일 import  https://brownbears.tistory.com/296
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+
 from .models import CtaCert, CtaIdPw, BsIdPw
 from scripts.utils import get_cert_info, ift_call2
 import json
